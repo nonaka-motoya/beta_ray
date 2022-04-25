@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
     
@@ -14,9 +15,22 @@ class betaDecay():
         読み込むファイルの数
     """
     
-    def __init__(self, dirName, numFile):
+    def __init__(self, dirName):
+        """
+        betaDecayクラスのコンストラクタ
+        
+        Parameters
+        -----------
+        dirName: str
+            データのあるディレクトリの数
+        """
+        
         self.dirName = dirName
-        self.numFile = numFile
+        try:
+            self.numFile = sum(os.path.isfile(os.path.join(self.dirName, name)) for name in os.listdir(self.dirName))
+        except:
+            print("Does not exist such a directory!")
+            exit(1)
         
     
     def load_data(self, filename):
@@ -81,12 +95,16 @@ class betaDecay():
         波形の面積を計算する
         出力は'output/area.txt'にされる
         """
-        
-        f = open('output/area.txt', 'w') # 出力結果を書き込むファイル
+        outputfile = 'output/'  + self.dirName + '_area.txt'
+        f = open(outputfile, 'w') # 出力結果を書き込むファイル
         
         for i in range(self.numFile):
             filename =  self.dirName + '/wfm_' + str(i+1) + '.txt' # ファイル名
-            t, V = self.load_data(filename) # テキストファイルを読み込んでtとVを抽出
+            try:
+                t, V = self.load_data(filename) # テキストファイルを読み込んでtとVを抽出
+            except:
+                print('does not exist' + filename + '!')
+                continue
             area = self.calcArea(t, V) # 波形の面積を計算
             f.write(str(area))
             f.write('\n')
@@ -95,16 +113,22 @@ class betaDecay():
     
     
     
-    def calibration(self):
+    def calibration(self, Qarea, Qenergy):
         """
         キャリブレーションをする
-        作成中
+    
+        Parameters
+        ----------
+        Qarea: float
+            Q値の面積
+        Qenergy: float
+            Q値のエネルギー
         """
         
-        f = open('output/energy.txt', 'w')
+        f = open('output/' + self.dirName + '_energy.txt', 'w')
         
-        area = np.loadtxt('output/area.txt')
-        ratio = 2.28 / 200
+        area = np.loadtxt('output/' + self.dirName + '_area.txt')
+        ratio = Qenergy / Qarea
         energy = area * ratio
         
         for i in range(energy.size):
@@ -130,7 +154,7 @@ class betaDecay():
         binMax: double
             最大値
         """
-        area = np.loadtxt('output/area.txt')
+        area = np.loadtxt('output/' + self.dirName + '_area.txt')
         
         if not binMin:
             binMin = area.min()
@@ -143,16 +167,21 @@ class betaDecay():
         plt.xlim(binMin, binMax)
         plt.xlabel(r'area (mV $\cdot$  ns)')
         plt.ylabel('count')
+        plt.title('Entry: {}'.format(area.size))
         
         if isLog:
             plt.yscale('log')
+        
+        plt.grid()
+        
+        plt.savefig('output/' + self.dirName + '_area.png')
         
         plt.show()
         
         
         
-    def plotEnergyDistribution(self, binNum=500, binMin=None, binMax=None):
-        energy = np.loadtxt('output/energy.txt')
+    def plotEnergyDistribution(self, isLog=False, binNum=500, binMin=None, binMax=None):
+        energy = np.loadtxt('output/' + self.dirName + '_energy.txt')
         
         if not binMin:
             binMin = energy.min() - 0.5
@@ -165,6 +194,11 @@ class betaDecay():
         plt.xlim(binMin, binMax)
         plt.xlabel(r'energy (MeV)')
         plt.ylabel('count')
+        
+        if isLog:
+            plt.yscale('log')
+            
+        plt.savefig('output/' + self.dirName + '_energy.png')
         plt.show()
         
         
@@ -185,5 +219,7 @@ class betaDecay():
 
         plt.xlabel(r'$t$ (ns)')
         plt.ylabel(r'$V$ (mV)')
+        
+        plt.xlim(-50, 50)
 
         plt.show()

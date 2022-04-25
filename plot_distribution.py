@@ -1,9 +1,11 @@
 from betaDecay import betaDecay
 
-bd = betaDecay(dirName='2022_4_18', numFile=9999)
+dirName = '20220421'
 
-# bd.plotRawData('texio/wfm_0.txt')
-# bd.calcAreaDistribution()
-bd.plotDistribution(isLog=True)
-# bd.calibration()
-# bd.plotEnergyDistribution(500, 0, 3)
+bd = betaDecay(dirName=dirName)
+
+bd.plotRawData(dirName + '/wfm_2.txt')
+bd.calcAreaDistribution()
+bd.plotDistribution(isLog=False,binNum=70)
+bd.calibration(Qarea=17500, Qenergy=2.28)
+bd.plotEnergyDistribution(isLog=False, binNum=70, binMin=0, binMax=3)
