@@ -2,14 +2,10 @@ __pycache__
 .vscode
 .DS_Store
 data
-texio_read.py
 output
 macro.C
-
-2022_4_20
-2022_4_20_background
-20220421
-20220421_bg_col
 binary.dat
 copied_texio_read.py
 output_binary.py
+test0509
+test0509v2

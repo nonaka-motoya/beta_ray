@@ -23,9 +23,13 @@ class betaDecay():
         -----------
         dirName: str
             データのあるディレクトリの数
+            
+        dataDir: str
+            データのあるディレクトリの親ディレクトリの名前
         """
         
         self.dirName = dirName
+        self.dataDir = self.dirName.split('/')[-1]
         try:
             self.numFile = sum(os.path.isfile(os.path.join(self.dirName, name)) for name in os.listdir(self.dirName))
         except:
@@ -95,7 +99,10 @@ class betaDecay():
         波形の面積を計算する
         出力は'output/area.txt'にされる
         """
-        outputfile = 'output/'  + self.dirName + '_area.txt'
+        if (not os.path.exists('output')):
+            os.mkdir('output')
+        
+        outputfile = 'output/'  + self.dataDir + '_area.txt'
         f = open(outputfile, 'w') # 出力結果を書き込むファイル
         
         for i in range(self.numFile):
@@ -103,7 +110,7 @@ class betaDecay():
             try:
                 t, V = self.load_data(filename) # テキストファイルを読み込んでtとVを抽出
             except:
-                print('does not exist' + filename + '!')
+                print('does not exist ' + filename + '!')
                 continue
             area = self.calcArea(t, V) # 波形の面積を計算
             f.write(str(area))
@@ -125,9 +132,9 @@ class betaDecay():
             Q値のエネルギー
         """
         
-        f = open('output/' + self.dirName + '_energy.txt', 'w')
+        f = open('output/' + self.dataDir + '_energy.txt', 'w')
         
-        area = np.loadtxt('output/' + self.dirName + '_area.txt')
+        area = np.loadtxt('output/' + self.dataDir + '_area.txt')
         ratio = Qenergy / Qarea
         energy = area * ratio
         
@@ -154,7 +161,8 @@ class betaDecay():
         binMax: double
             最大値
         """
-        area = np.loadtxt('output/' + self.dirName + '_area.txt')
+        
+        area = np.loadtxt('output/' + self.dataDir + '_area.txt')
         
         if not binMin:
             binMin = area.min()
@@ -174,14 +182,14 @@ class betaDecay():
         
         plt.grid()
         
-        plt.savefig('output/' + self.dirName + '_area.png')
+        plt.savefig('output/' + self.dataDir + '_area.png')
         
         plt.show()
         
         
         
     def plotEnergyDistribution(self, isLog=False, binNum=500, binMin=None, binMax=None):
-        energy = np.loadtxt('output/' + self.dirName + '_energy.txt')
+        energy = np.loadtxt('output/' + self.dataDir + '_energy.txt')
         
         if not binMin:
             binMin = energy.min() - 0.5
@@ -198,7 +206,7 @@ class betaDecay():
         if isLog:
             plt.yscale('log')
             
-        plt.savefig('output/' + self.dirName + '_energy.png')
+        plt.savefig('output/' + self.dataDir + '_energy.png')
         plt.show()
         
         
